@@ -2,10 +2,6 @@
 
 This repository presents the code for the paper "[AS-XAI: self-supervised automatic semantic interpretation for cnn]" .
 
-<img src="./src/intro1.png" style="zoom:50%;" >
-
-Considering the examples above, how would you identify the bird image as a *Yellow-headed Blackbird* and not a *Cape Glossy Starling*? Maybe you find that the bird's head, legs, and feathers look like those concepts of *Yellow-headed Blackbird* rather than *Cape Glossy Starling*. In other words, you may gather the evidence in your mind and make a final decision. Specifically, humans usually explain their reasoning process by dissecting the image into object parts and pointing out the evidence from these identified parts to the concepts stored in his / her mind. Therefore, for the intelligent machine, it is an emergent issue to determine the object parts and construct the concepts in order to implement interpretable image classification.
-
 >**AS-XAI: self-supervised automatic semantic interpretation for cnn**
 >
 >Changi Sun, Hao Xu, Yuntian Chen, Dongxiao Zhang
