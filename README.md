@@ -1,11 +1,4 @@
-# AS-XAI: self-supervised automatic semantic interpretation for cnn
-
-This repository presents the code for the paper "[AS-XAI: self-supervised automatic semantic interpretation for cnn]" .
-
->**AS-XAI: self-supervised automatic semantic interpretation for cnn**
->
->Changi Sun, Hao Xu, Yuntian Chen, Dongxiao Zhang
->
+# AS-XAI
 
 
 ## Getting Started
