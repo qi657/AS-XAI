@@ -34,3 +34,5 @@ Run `Auto mask/tools/analysis.py`
 1. Compile the different semantic concepts obtained in step 1 by `XAI/cut_position.py`
 2. Explaining CNN decision-making by `XAI/row_center_pca.py` (You can perform different functions depending on the comments in the code.)
 
+## Human Quantitative Evaluation
+For detailed design details please see: https://github.com/qi657/AS-XAI-Human-Evaluation
