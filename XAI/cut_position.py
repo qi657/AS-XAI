@@ -40,14 +40,14 @@ test_loader = torch.utils.data.DataLoader(
 
 
 def cut_position(use_model):
-    # 自动mask语义特征
+    # Automatic mask semantic features
     segment_save=[]
     origin_save=[]
     for i, data in enumerate(test_loader):
         print('----------第%d次迭代----------' % (i))
         image, label = data  # image:[1,3,512,512]
         img = torchvision.utils.make_grid(image)
-        img = img.cpu().data.numpy().transpose((1, 2, 0))  # 本来是(0,1,2)，相当于把第一维变为第三维，其他两维前移 [512,512,3]
+        img = img.cpu().data.numpy().transpose((1, 2, 0))
 
         origin_save.append(image.cpu().data.numpy())
 
@@ -59,5 +59,5 @@ def cut_position(use_model):
             break
 
 
-# 提取共性局部特征
+# Extract common local features
 cut_position(use_model)
