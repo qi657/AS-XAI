@@ -7,7 +7,7 @@ add_on_layers_type = 'regular'
 experiment_run = '001'
 
 # cat_dog_scq
-data_path = "D:/datasets/cat_vs_dog_scq/"  # 二分类
+data_path = "D:/datasets/cat_vs_dog_scq/" 
 train_dir = data_path + 'train_augment/'
 test_dir = data_path + 'counterfactual/'   # test, counterfactual
 # test_dir = 'C:/Users/sunchangqi/Desktop/img/'
@@ -19,13 +19,13 @@ train_push_dir = data_path + 'train/'
 # train_push_dir = data_path + 'train/'
 
 
-# data_path = "D:/datasets/cat_dog_scq/"  # 五分类
+# data_path = "D:/datasets/cat_dog_scq/"  
 # train_dir = data_path + 'train_cropped_augmented/'
 # test_dir = data_path + 'test/'   # test
 # train_push_dir = data_path + 'train/'
 
 # stanford dogs
-# data_path = "D:/datasets/stanford dogs/cropped/"  # 7分类
+# data_path = "D:/datasets/stanford dogs/cropped/"  
 # train_dir = data_path + 'train_augment_small/'
 # test_dir = data_path + 'test_small/'   # test
 # train_push_dir = data_path + 'train_small/'
