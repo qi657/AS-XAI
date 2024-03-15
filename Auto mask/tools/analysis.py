@@ -229,13 +229,12 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
         plt.imsave(fname, img_rgb_float)
 
 
-    # 定义颜色通道转换
     def color_space_transform_rgb(img):
-        img_np = img.cpu().numpy()  # 将 PyTorch 张量转换为 NumPy 数组
-        img_np = img_np.transpose((1, 2, 0))  # 将颜色通道放到最后一个维度
-        img_np = cv2.cvtColor(img_np, cv2.COLOR_HSV2RGB)  # 将颜色空间从 HSV 转换为 RGB
-        img_np = img_np.transpose((2, 0, 1))  # 将颜色通道放回第一个维度
-        img = torch.from_numpy(img_np)  # 将 NumPy 数组转换为 PyTorch 张量
+        img_np = img.cpu().numpy()  
+        img_np = img_np.transpose((1, 2, 0))  
+        img_np = cv2.cvtColor(img_np, cv2.COLOR_HSV2RGB)  
+        img_np = img_np.transpose((2, 0, 1)) 
+        img = torch.from_numpy(img_np)  
         return img
 
     gx = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
@@ -253,8 +252,7 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
 
 
     def generate_irregular_mask(activation_map, threshold):
-        # gray_value = (192, 192, 192)  # RGB值为十六进制灰色，这里设置为中灰色
-        # 创建二值掩码
+        # gray_value = (192, 192, 192)  
         mask = np.zeros_like(activation_map)
         mask[activation_map >= threshold] = 255
         mask = np.uint8(mask)
@@ -316,7 +314,6 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
     if False:
         for i in range(0,50):
             log('top {0} activated prototype for this image:'.format(i))
-            # 与激活位置相似的原型区域
             save_prototype(os.path.join(save_analysis_path, 'most_activated_prototypes',
                                         'top-%d_activated_prototype.png' % i),
                            start_epoch_number, sorted_indices_act[-i].item())
@@ -355,18 +352,16 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
             activation_pattern = prototype_activation_patterns[idx][sorted_indices_act[-i].item()].detach().cpu().numpy()
 
             upsampled_activation_pattern = cv2.resize(activation_pattern, dsize=(img_size, img_size),
-                                                      interpolation=cv2.INTER_CUBIC) # 上采样到与输入图像相同大小
+                                                      interpolation=cv2.INTER_CUBIC) 
 
 
 
-            # 假设你已经有了激活图 activation_map 和原始图像 original_image
-            activation_map = upsampled_activation_pattern  # 激活图
-            original_image = original_img  # 原始图像
+            activation_map = upsampled_activation_pattern  
+            original_image = original_img 
 
-            percentile = 96  # 阈值
+            percentile = 96  
             threshold = np.percentile(activation_map, percentile)
 
-            # 生成不规则掩码
             irregular_mask = generate_irregular_mask(activation_map, threshold)
             irregular_mask_1 = generate_irregular_mask(activation_map, threshold)
             irregular_mask_2= generate_irregular_mask(activation_map, threshold)
@@ -374,44 +369,33 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
             # plt.imshow(irregular_mask)
             # plt.show()
 
-            # 应用不规则掩码到原始图像
             masked_image_1 = np.copy(original_image)
-            masked_image_1[irregular_mask_1 == 0] = 0  # 黑白的高激活区域（用来做mask）
-
-            alpha = 0.3  # 透明度参数，调整透明度的程度
+            masked_image_1[irregular_mask_1 == 0] = 0 
+            alpha = 0.3  
 
             masked_image_2 = np.copy(original_image)
-            mask_indices = np.where(irregular_mask_2 != 0)  # mask的索引
+            mask_indices = np.where(irregular_mask_2 != 0) 
 
-            # 将mask以外的像素设置为更透明
             masked_image_2[mask_indices] = masked_image_2[mask_indices] * (1 - alpha)
 
-            # 将mask以内的像素设置为更清晰
             masked_image_2[irregular_mask_2 != 0] = masked_image_2[irregular_mask_2 != 0] * (1 - alpha) + \
                                                     original_image[irregular_mask_2 != 0] * alpha
 
             masked_image_2 = np.copy(original_image)
-            masked_image_2[irregular_mask_2 == 0] = masked_image_2[irregular_mask_2 == 0] * 0.7  # 调整亮度值   可视化（贴图用）
-
+            masked_image_2[irregular_mask_2 == 0] = masked_image_2[irregular_mask_2 == 0] * 0.7  
             masked_image_3 = np.copy(original_image)
             masked_image_3[irregular_mask_3 == 255] = [255,255,0]
 
-            # 将不规则掩码转换为二值图像
             irregular_mask_binary = np.uint8(irregular_mask_2 > 0)
 
-            # 绘制不规则掩码边缘
             contours, _ = cv2.findContours(irregular_mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            # 将 masked_image 转换为 UMat 类型
             masked_image_umat = cv2.UMat(masked_image_2)
 
-            # 绘制不规则掩码边缘
             cv2.drawContours(masked_image_umat, contours, -1, (255, 0, 0), 0)
 
-            # 将 masked_image_umat 转换回 ndarray 类型
             masked_image_2 = cv2.UMat.get(masked_image_umat)
 
 
-            # 可视化结果
             fig, axes = plt.subplots(1, 3, figsize=(10, 5))
             axes[0].imshow(activation_map, cmap='hot')
             axes[0].set_title('Activation Map')
@@ -437,11 +421,10 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
 
 
 
-            # show the most highly activated patch of the image by this prototype  显示了该原型激活程度最高的图像补丁
+            # show the most highly activated patch of the image by this prototype
             high_act_patch_indices = find_high_activation_crop(upsampled_activation_pattern)
 
 
-            # 激活之后的patch
             # high_act_patch = original_img[prototype_info[sorted_indices_act[-i].item()][1]:prototype_info[sorted_indices_act[-i].item()][2].
             #                             prototype_info[sorted_indices_act[-i].item()][3]:prototype_info[sorted_indices_act[-i].item()][4],:]
             high_act_patch = original_img[high_act_patch_indices[0]:high_act_patch_indices[1],
@@ -460,7 +443,7 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
                              bbox_width_start=high_act_patch_indices[2],
                              bbox_width_end=high_act_patch_indices[3], color=(0, 255, 255))
 
-            # show the image overlayed with prototype activation map  显示与原型激活图重叠的图像
+            # show the image overlayed with prototype activation map  
             rescaled_activation_pattern = upsampled_activation_pattern - np.amin(upsampled_activation_pattern)
             rescaled_activation_pattern = rescaled_activation_pattern / np.amax(rescaled_activation_pattern)
             heatmap = cv2.applyColorMap(np.uint8(255*rescaled_activation_pattern), cv2.COLORMAP_JET)
@@ -504,50 +487,6 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
 
         prototype_cnt = 1
 
-        # for j in reversed(sorted_indices_cls_act.detach().cpu().numpy()):
-        # if i == 0:
-        #     ## 1_eye
-        #     index = (19, 120, 59, 90, 75, 135, 168, 74, 141, 40, 138, 4, 35, 149, 67, 173, 107, 36, 15, 129, 185, 194, 150)
-        #     ## 2_eye
-        #     index = (4, 99, 47, 57, 49, 36, 76, 103, 19, 32, 18, 54, 28, 63, 77)  # or_test
-        #     ## 3_eye
-        #     index = (24, 106, 76, 84, 99, 61, 55, 117, 14, 49, 118, 111, 66, 104, 47, 30, 59, 119) # or_test
-        #     ## 4_eye
-        #     # index = (94,46,16,64,40,76,29,65,54,58,55,66,0,53,27,83,19,96,82,75,4,14,87,69)
-        #     ## 5_eye
-        #     # index = (53,75,63,62,57,25,73,113,16,22,59,35,69,46,93,71,27,1,112,6,54,33,18,83,99,34,50,61,51,107,91,87)
-        #     ## cats_eye
-        #     index = (
-        #     49, 72, 47, 498, 115, 68, 325, 27, 144, 323, 407, 244, 288, 25, 431, 390, 251, 113, 123, 419, 247, 337, 335,
-        #     425, 488, 156, 160, 217, 201, 272, 34, 118, 454, 262, 82, 231, 399, 119, 198, 315, 462, 154, 461, 79, 56,
-        #     357, 499, 332, 147, 142, 237, 405, 389, 292)
-        #     ## 1_ear
-        #     index = (176, 50, 122, 190, 154, 5, 148, 146, 100, 23) # oplcluster
-
-        #     ## 1_leg
-        #     index = (195, 184, 196, 31, 139, 167, 145, 179, 20, 197, 158, 177, 109, 76, 101, 73, 162, 103, 45, 187)  # oplcluster
-
-        # elif i == 1:
-            # index = (18, 28, 35, 54, 36, 58, 4, 57, 104, 103, 47) # or_test_eye
-            # index = (82, 165, 23, 151, 74, 108, 32, 9, 5, 122, 110, 84, 49, 174, 105, 136, 69, 76, 35, 127) # opl_cluster_eye
-            # index = (99, 189, 66, 81, 95, 67, 65, 147, 126, 10, 138) # opl_cluster_ear
-            # index = (122, 135, 78, 11, 181, 51) # opl_cluster_leg
-        # elif i == 2:
-            # index = (30, 71, 55, 61, 106, 117, 118, 99, 104, 38, 47, 119)  # or_test_eye
-            # index = (18, 142, 149, 36, 101, 47, 24, 80, 71, 44, 151, 59, 189, 174, 11, 158, 92, 164, 188, 167, 159, 40, 5, 141, 134, 138) # opl_cluster_eye
-            # index = ( 84, 126, 176, 187, 29, 33, 181, 1)  # opl_cluster_ear
-            # index = (170, 7, 104, 38, 65, 125, 183, 195, 182, 86, 34, 147, 103, 169) # opl_cluster_leg
-        # elif i == 3:
-            # index = (23, 20, 103, 107, 116, 54, 100, 117, 24, 79, 95, 91)  # or_test
-            # index = (129, 170, 82, 13, 127, 48, 98, 189, 124, 31) # opl_cluster_eye
-            # index = (126, 119, 191, 184, 38, 85, 62, 158, 172) # opl_cluster_ear
-            # index = (134, 71, 110, 117, 97, 190, 174, 125, 108, 136, 32, 9, 135, 180) # opl_cluster_leg
-        # elif i == 4:
-            # index = (21, 86, 7, 70, 112, 75, 25, 47, 119, 12, 87, 26, 88, 118, 53, 10, 36, 50, 102) # or_test
-            # index = (151, 41, 66, 146, 172, 166, 67, 48, 138, 50, 136, 130, 99, 71, 2, 106) # opl_cluster_eye
-            # index = (14, 13, 177, 176, 143, 144, 44, 62, 189, 152, 188, 116) # opl_cluster_ear
-            # index = (1, 145, 184, 121, 175, 88, 9, 173, 64, 53) # opl_cluster_leg
-        # else:
         _, sorted_indices_cls_act_1 = torch.sort(class_prototype_activations, descending=True)
         index = sorted_indices_cls_act_1.detach().cpu().numpy()
 
@@ -558,17 +497,6 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
             save_prototype(os.path.join(save_analysis_path, 'top-%d_class_prototypes' % (i+1),
                                         'top-%d_activated_prototype.png' % prototype_cnt),
                            start_epoch_number, prototype_index)
-
-            # save_prototype_new_act(os.path.join(save_analysis_path, 'top-%d_class_prototypes' % (i+1),
-            #                                     'top-%d_activated_prototype_new_act.png' % prototype_cnt),
-            #                        start_epoch_number, prototype_index)
-            #
-            # save_prototype_new_mask(os.path.join(save_analysis_path, 'top-%d_class_prototypes' % (i+1),
-            #                                      'top-%d_activated_prototype_new_mask.png' % prototype_cnt),
-            #                         start_epoch_number, prototype_index)
-            # save_prototype_new_round(os.path.join(save_analysis_path, 'top-%d_class_prototypes' % (i+1),
-            #                                       'top-%d_activated_prototype_new_round.png' % prototype_cnt),
-            #                          start_epoch_number, prototype_index)
 
             save_prototype_original_img_with_bbox(fname=os.path.join(save_analysis_path, 'top-%d_class_prototypes' % (i+1),
                                                                      'top-%d_activated_prototype_in_original_pimg.png' % prototype_cnt),
@@ -666,170 +594,41 @@ for model_dir,model_name in zip(model_dir_list,model_name_list):
                 else:
                     width_patch_indices_begin = high_act_patch_indices[2]
 
-            # # 假设你已经有了激活图 activation_map 和原始图像 original_image
-            # activation_map = upsampled_activation_pattern  # 激活图
-            # original_image = original_img  # 原始图像
-            #
-            # percentile = 96  # 阈值
-            # threshold = np.percentile(activation_map, percentile)
-            #
-            # # 生成不规则掩码
-            # irregular_mask = generate_irregular_mask(activation_map, threshold)
-            # irregular_mask_1 = generate_irregular_mask(activation_map, threshold)
-            # irregular_mask_2= generate_irregular_mask(activation_map, threshold)
-            # irregular_mask_3 = generate_irregular_mask(activation_map, threshold)
-            # # irregular_mask_4 = generate_irregular_mask(activation_map, threshold)
-            #
-            #
-            # # 应用不规则掩码到原始图像
-            # masked_image_1 = np.copy(original_image)
-            # # masked_image_1[irregular_mask_1 == 0] = 0  # 黑白的高激活区域（用来做mask）
-            # masked_image_1[irregular_mask_1 == 0] = 0.8 # mask以外的区域变成灰色
-            #
-            #
-            # brightness_factor = 1.2
-            # darkness_factor = 0.2
-            # masked_image_2 = np.copy(original_image)
-            # masked_image_2[irregular_mask_2 == 0] = masked_image_2[irregular_mask_2 == 0] * darkness_factor  # mask以外的部分亮度低
-            # mask_indices = np.where(irregular_mask_2 != 0)
-            # masked_image_2[mask_indices] = masked_image_2[mask_indices] * brightness_factor  # mask以内的部分亮度高
-            #
-            # # new code
-            # irregular_mask_binary = np.uint8(irregular_mask_2 > 0)
-            # contours, _ = cv2.findContours(irregular_mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            # bounding_box = cv2.boundingRect(contours[0])
-            # x, y, w, h = bounding_box
-            # # 计算边界框的中心点
-            # center_x, center_y = x + w // 2, y + h // 2
-            # # 将mask以外的部分置为透明
-            # masked_image_2[irregular_mask_1 == 0] = 0.9
-            # # 等比例放大mask内部的图像
-            # scale_factor = 2  # 假设放大倍数为2
-            # resized_image = cv2.resize(masked_image_2[y:y + h, x:x + w], None, fx=scale_factor, fy=scale_factor)
-            #
-            # h_resized, w_resized, _ = resized_image.shape
-            # # x1, x2 = center_x - w_resized // 2, center_x + w_resized // 2
-            # # y1, y2 = center_y - h_resized // 2, center_y + h_resized // 2
-            # #
-            # # x1, x2 = max(center_x - w_resized // 2, 0), max(center_y - h_resized // 2, 0)
-            # # y1, y2 = min(center_x + w_resized // 2, masked_image_2.shape[1]), min(center_y + h_resized // 2, masked_image_2.shape[0])
-            #
-            # x1_resized, y1_resized = max(center_x - w_resized // 2, 0), max(center_y - h_resized // 2, 0)
-            # x2_resized, y2_resized = min(center_x + w_resized // 2, masked_image_2.shape[1]), min(center_y + h_resized // 2, masked_image_2.shape[0])
-            #
-            # h_resized_inside = y2_resized - y1_resized
-            # w_resized_inside = x2_resized - x1_resized
-            # resized_image = np.clip(resized_image, 0, 1)
-            # # if h_resized_inside == h_resized and w_resized_inside == w_resized:
-            # masked_image_2[y1_resized:y2_resized, x1_resized:x2_resized] = resized_image
-            # masked_image_2 = np.clip(masked_image_2, 0, 1)
-            #
-            #
-            # # masked_image_2[y1:y2, x1:x2] = resized_image
-            # # target_region = masked_image_2[y1:y1 + h_resized, x1:x1 + w_resized]
-            # # h_resized_inside = y2 - x2
-            # # w_resized_inside = y1 - x1
-            # # target_region = masked_image_2[x2:y2, x1:y1]
-            # # target_region = np.clip(target_region, 0, 1)
-            #
-            # # if target_region.shape[:2] != resized_image.shape[:2]:
-            # #     resized_image = cv2.resize(resized_image, (w_resized, h_resized))
-            # # if (y1+h_resized <= 224 and x1+w_resized <=224) or (y1+h_resized <= 224 or x1+w_resized <=224):
-            # #     masked_image_2[y1:y1 + h_resized, x1:x1 + w_resized] = resized_image
-            # # elif y1+h_resized > 224 and x1+w_resized <=224:
-            # #     h_new = 224
-            # #     masked_image_2[y1:h_new, x1:x1 + w_resized] = resized_image
-            # # elif y1+h_resized <= 224 and x1+w_resized > 224:
-            # #     w_new = 224
-            # #     masked_image_2[y1:h_resized, x1:x1 + w_new] = resized_image
-            # # else:
-            # #     h_new = 224
-            # #     w_new = 224
-            # #     masked_image_2[y1:h_new, x1:x1 + w_new] = resized_image
-            #
-            # brightness_factor = 1.2
-            # darkness_factor = 0.2
-            # masked_image_4 = np.copy(original_image)
-            # masked_image_4[irregular_mask_4 == 0] = masked_image_4[irregular_mask_4 == 0] * darkness_factor  # mask以外的部分亮度低
-            # mask_indices = np.where(irregular_mask_4 != 0)
-            # masked_image_4[mask_indices] = masked_image_4[mask_indices] * brightness_factor  # mask以内的部分亮度高
-            # # 等比例放大不规则边缘的轮廓点
-            # scaled_contours = [cv2.approxPolyDP(cnt, scale_factor, True) for cnt in contours]
-            #
-            # # 在当前放大后的 masked_image_2 上绘制不规则边缘
-            # masked_image_4_with_contours = np.copy(masked_image_4)
-            # masked_image_4_with_contours_umat = cv2.UMat(masked_image_4_with_contours)
-            # cv2.drawContours(masked_image_4_with_contours_umat, scaled_contours, -1, (255, 0, 0), 2)
-            # masked_image_4 = cv2.UMat.get(masked_image_4_with_contours_umat)
-            #
-            #
-            # masked_image_3 = np.copy(original_image)
-            # masked_image_3[irregular_mask_3 == 255] = [255, 255, 0]
-            #
-            #
-            # # 可视化结果
-            # fig, axes = plt.subplots(1, 4, figsize=(10, 5))
-            # axes[0].imshow(activation_map, cmap='hot')
-            # axes[0].set_title('Activation Map')
-            # axes[0].axis('off')
-            #
-            # axes[1].imshow(masked_image_1)
-            # axes[1].set_title('Masked Image1')
-            # axes[1].axis('off')
-            #
-            # axes[2].imshow(masked_image_2)
-            # axes[2].set_title('Masked Image2')
-            # axes[2].axis('off')
-            #
-            # axes[3].imshow(masked_image_4)
-            # axes[3].set_title('Masked Image4')
-            # axes[3].axis('off')
-            # plt.show()
-            # exit(0)
+           
+            activation_map = upsampled_activation_pattern  
+            original_image = original_img  
 
-            # 假设你已经有了激活图 activation_map 和原始图像 original_image
-            activation_map = upsampled_activation_pattern  # 激活图
-            original_image = original_img  # 原始图像
-
-            percentile = 95  # 阈值
+            percentile = 95 
             threshold = np.percentile(activation_map, percentile)
 
-            # 生成不规则掩码
             irregular_mask = generate_irregular_mask(activation_map, threshold)
             irregular_mask_1 = generate_irregular_mask(activation_map, threshold)
             irregular_mask_2 = generate_irregular_mask(activation_map, threshold)
             irregular_mask_3 = generate_irregular_mask(activation_map, threshold)
 
-            # 应用不规则掩码到原始图像
             masked_image_1 = np.copy(original_image)
-            masked_image_1[irregular_mask_1 == 0] = 0.8  # 黑白的高激活区域（用来做mask）
+            masked_image_1[irregular_mask_1 == 0] = 0.8  
 
             brightness_factor = 1
             darkness_factor = 0.5
             masked_image_2 = np.copy(original_image)
             masked_image_2[irregular_mask_2 == 0] = masked_image_2[
-                                                        irregular_mask_2 == 0] * darkness_factor  # mask以外的部分亮度低
+                                                        irregular_mask_2 == 0] * darkness_factor  
             mask_indices = np.where(irregular_mask_2 != 0)
-            masked_image_2[mask_indices] = masked_image_2[mask_indices] * brightness_factor  # mask以内的部分亮度高
+            masked_image_2[mask_indices] = masked_image_2[mask_indices] * brightness_factor  
 
             masked_image_3 = np.copy(original_image)
             masked_image_3[irregular_mask_3 == 255] = [255, 255, 0]
 
-            # 将不规则掩码转换为二值图像
             irregular_mask_binary = np.uint8(irregular_mask_2 > 0)
 
-            # 绘制不规则掩码边缘
             contours, _ = cv2.findContours(irregular_mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            # 将 masked_image 转换为 UMat 类型
             masked_image_umat = cv2.UMat(masked_image_2)
 
-            # 绘制不规则掩码边缘
             cv2.drawContours(masked_image_umat, contours, -1, (255, 0, 0), 2)
 
-            # 将 masked_image_umat 转换回 ndarray 类型
             masked_image_2 = cv2.UMat.get(masked_image_umat)
 
-            # 可视化结果
             fig, axes = plt.subplots(1, 3, figsize=(10, 5))
             axes[0].imshow(activation_map, cmap='hot')
             axes[0].set_title('Activation Map')
