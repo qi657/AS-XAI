@@ -35,21 +35,21 @@ target_folders = [os.path.join(target_dir, folder) for folder in next(os.walk(di
 for i in range(len(folders)):
     fd = folders[i]
     tfd = target_folders[i]
-# rotation  旋转
+# rotation 
 p = Augmentor.Pipeline(source_directory=dir, output_directory=target_dir)
 p.rotate(probability=1, max_left_rotation=15, max_right_rotation=15)
 p.flip_left_right(probability=0.5)
 for i in range(4):
     p.process()
 del p
-# skew  扭曲
+# skew  
 p = Augmentor.Pipeline(source_directory=dir, output_directory=target_dir)
 p.skew(probability=1, magnitude=0.2)  # max 45 degrees
 p.flip_left_right(probability=0.5)
 for i in range(4):
     p.process()
 del p
-# shear 裁剪
+# shear 
 p = Augmentor.Pipeline(source_directory=dir, output_directory=target_dir)
 p.shear(probability=1, max_shear_left=10, max_shear_right=10)
 p.flip_left_right(probability=0.5)
