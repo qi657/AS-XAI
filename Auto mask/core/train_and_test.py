@@ -11,11 +11,11 @@ import cv2
 
 
 def color_space_transform(img):
-    img_np = img.cpu().detach().numpy()  # 将 PyTorch 张量转换为 NumPy 数组
-    img_np = img_np.transpose((1, 2, 0))  # 将颜色通道放到最后一个维度
-    img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2HSV)  # 将颜色空间从 RGB 转换为 HSV
-    img_np = img_np.transpose((2, 0, 1))  # 将颜色通道放回第一个维度
-    img = torch.from_numpy(img_np)  # 将 NumPy 数组转换为 PyTorch 张量
+    img_np = img.cpu().detach().numpy()  
+    img_np = img_np.transpose((1, 2, 0)) 
+    img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2HSV)  
+    img_np = img_np.transpose((2, 0, 1)) 
+    img = torch.from_numpy(img_np) 
     return img
 
 
@@ -263,12 +263,12 @@ def _train_or_test(model, dataloader, optimizer=None, class_specific=True, use_l
 
                 subspace_max_dist = (model.module.prototype_shape[0]* model.module.prototype_shape[2]* model.module.prototype_shape[3]) #2000
                 # prototypes_of_correct_class is a tensor of shape batch_size * num_prototypes
-                # calculate cluster cost  类内聚拢
-                prototypes_of_correct_class = torch.t(model.module.prototype_class_identity[:,label]).cuda()  # [80, 2000] P的转置
-                inverted_distances, _ = torch.max((max_dist - min_distances) * prototypes_of_correct_class, dim=1)  # min_distance表示每个原型向量与当前样本的最小距离
-                cluster_cost = torch.mean(max_dist - inverted_distances)  # 衡量最大距离和最小距离差值的平均值，同一类别内部的紧密程度（原型向量之间的相似性）
+                # calculate cluster cost  
+                prototypes_of_correct_class = torch.t(model.module.prototype_class_identity[:,label]).cuda()  # [80, 2000] 
+                inverted_distances, _ = torch.max((max_dist - min_distances) * prototypes_of_correct_class, dim=1)  
+                cluster_cost = torch.mean(max_dist - inverted_distances)  
 
-                # calculate separation cost  类间分离
+                # calculate separation cost  
                 prototypes_of_wrong_class = 1 - prototypes_of_correct_class
                 inverted_distances_to_nontarget_prototypes, _ = \
                     torch.max((max_dist - min_distances) * prototypes_of_wrong_class, dim=1)
@@ -281,13 +281,13 @@ def _train_or_test(model, dataloader, optimizer=None, class_specific=True, use_l
 
 
 
-                # optimize orthogonality of prototype_vector 标准正交损失-类内正交
-                # 其中10表示concept M，每个原型分了10个64大小的feature，一共有200个原型 C，所以一共MxC=2000个feature
+                # optimize orthogonality of prototype_vector 
+                
                 cur_basis_matrix = torch.squeeze(model.module.prototype_vectors) #[2000,64]
                 subspace_basis_matrix = cur_basis_matrix.reshape(model.module.num_classes,model.module.num_prototypes_per_class,model.module.prototype_shape[1])#[200,10,64]
                 subspace_basis_matrix_T = torch.transpose(subspace_basis_matrix,1,2) #[200,10,64]->[200,64,10]
                 orth_operator = torch.matmul(subspace_basis_matrix,subspace_basis_matrix_T)  # [200,10,64] [200,64,10] -> [200,10,10]
-                I_operator = torch.eye(subspace_basis_matrix.size(1),subspace_basis_matrix.size(1)).cuda() #[10,10]  对角线全为一，其余全为0的二维数组
+                I_operator = torch.eye(subspace_basis_matrix.size(1),subspace_basis_matrix.size(1)).cuda() #[10,10]  
                 difference_value = orth_operator - I_operator #[200,10,10]-[10,10]->[200,10,10]
                 orth_cost = torch.sum(torch.relu(torch.norm(difference_value,p=1,dim=[1,2]) - 0)) #[200]->[1]
 
