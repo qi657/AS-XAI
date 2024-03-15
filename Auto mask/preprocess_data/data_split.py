@@ -19,62 +19,57 @@ if data_name == 'leaves':
     data_dir = 'D:/datasets/classify-leaves/'  # Please input your data path of classify-leaves
 
     def read_csv_labels(fname):
-        """读取 `fname` 来给标签字典返回一个文件名。"""
         with open(fname, 'r') as f:
             lines = f.readlines()[1:]
         tokens = [l.rstrip().split(',') for l in lines]
         return dict(((name, label) for name, label in tokens))
 
-    labels = read_csv_labels(os.path.join(data_dir, 'train.csv')) # 存放训练集标签的文件
+    labels = read_csv_labels(os.path.join(data_dir, 'train.csv')) 
 
 
     def copyfile(filename, target_dir):
-        """将文件复制到目标目录。"""
         os.makedirs(target_dir, exist_ok=True)
         shutil.copy(filename, target_dir)
 
 
     def reorg_train_valid(data_dir, labels, valid_ratio):
-        # 下面的collections.Counter就是统计label这个字典中有几个类别（返回字典）；.most_common()则转换成元组；[-1][1]则返回最后一个元组的第二个值(因为这个类别数量最小)
-        n = collections.Counter(labels.values()).most_common()[-1][1] # n就是数量最少类别对应的数量
-        n_valid_per_label = max(1, math.floor(n * valid_ratio)) # 根据最小类别数量，得出验证集的数量
+        n = collections.Counter(labels.values()).most_common()[-1][1]
+        n_valid_per_label = max(1, math.floor(n * valid_ratio))
         label_count = {}
-        for train_file in labels: # 返回训练集中的图片名字列表(我们看到，训练标签转换成的字典，key就是训练集的图片名字)
-            label = labels[train_file] # 每张图片 对应的标签
-            fname = os.path.join(data_dir, train_file) # 每个图片的完整路径
+        for train_file in labels:
+            label = labels[train_file] 
+            fname = os.path.join(data_dir, train_file)
             copyfile(
                 fname,
-                os.path.join(data_dir, 'train_valid_test', 'train_valid', label)) # 将图片复制到指定的目录下，这个是为了交叉验证使用，这里和训练集没区别
-            if label not in label_count or label_count[label] < n_valid_per_label: # 制作验证集。注：标签名作为key,value为每个标签的图片数量
+                os.path.join(data_dir, 'train_valid_test', 'train_valid', label)) 
+            if label not in label_count or label_count[label] < n_valid_per_label: 
                 copyfile(
                     fname,
                     os.path.join(data_dir, 'train_valid_test', 'valid', label))
-                label_count[label] = label_count.get(label, 0) + 1 # 统计每个标签的图片数量
-            else: # 制作训练集
+                label_count[label] = label_count.get(label, 0) + 1
+            else:
                 copyfile(
                     fname,
                     os.path.join(data_dir, 'train_valid_test', 'train', label))
-        return n_valid_per_label # 返回验证集的数量
+        return n_valid_per_label 
 
 
-    # 在预测期间整理测试集，以方便读取
     def reorg_test(data_dir):
         test = pd.read_csv(os.path.join(data_dir, 'test.csv'))
-        for test_file in test['image']: # 获取测试集图片的名字，复制到指定文件夹下
+        for test_file in test['image']:
             copyfile(
                 os.path.join(data_dir, test_file),
                 os.path.join(data_dir, 'train_valid_test', 'test', 'unknown'))
 
 
-    # 调用前面定义的函数，进行整理数据集
     def reorg_leave_data(data_dir, valid_ratio):
-        labels = read_csv_labels(os.path.join(data_dir, 'train.csv')) # 是个字典
-        reorg_train_valid(data_dir, labels, valid_ratio) # 生成训练集和验证集
-        reorg_test(data_dir) # 生成测试集
+        labels = read_csv_labels(os.path.join(data_dir, 'train.csv')) 
+        reorg_train_valid(data_dir, labels, valid_ratio)
+        reorg_test(data_dir) 
 
     batch_size = 128
-    valid_ratio = 0.1 # 验证集的比例
-    if not os.path.exists(data_dir + "\\" + "train_valid_test"): # 判断是否已经制作好了数据集
+    valid_ratio = 0.1 
+    if not os.path.exists(data_dir + "\\" + "train_valid_test"): 
         print("start!")
         reorg_leave_data(data_dir, valid_ratio)
     else:
@@ -88,10 +83,10 @@ if data_name == '12_kind_cat':
         lines = fh.readlines()
 
         for line in lines:
-            line = line.strip('\n')  # 移除字符串首尾的换行符
-            line = line.rstrip()  # 删除末尾空
-            words = line.split()  # 以空格为分隔符 将字符串分成两部分
-            imgs_name = words[0]  # imgs中包含有图像路径和标签
+            line = line.strip('\n') 
+            line = line.rstrip()  
+            words = line.split() 
+            imgs_name = words[0] 
             srcfile = 'D:/datasets/12_kind_cat/'+imgs_name
             print(srcfile)
             imgs_label = int(words[1])
@@ -124,7 +119,6 @@ if data_name == '12_kind_cat':
         print("Copy files Successfully!")
 
     if __name__ == '__main__':
-        # 创建文件夹
         label = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011"]
         for i in label:
             os.mkdir('D:/datasets/12_kind_cat/test/'+i)
