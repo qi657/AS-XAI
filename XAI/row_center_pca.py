@@ -122,7 +122,6 @@ class LayerActivations:
     def remove(self):
         self.hook.remove()
 
-# # 根据GA超像素输入到model中得到指定激活层的特征矩阵
 def generate_feature_matrix(use_model,conv_out,seed,lime=False):
     use_model.eval()
     use_model.to(config.device)
@@ -203,9 +202,9 @@ def load_PCA(n_components=2):
     return torch.nn.functional.relu(torch.from_numpy(feature_matrix_main.astype(np.float32)))
 
 def transform_raw_picture(pic):
-    img = torchvision.utils.make_grid(pic)  # 把batch_size张的图片拼成一个图片
-    img = img.numpy().transpose((1, 2, 0))  # 本来是(0,1,2)，相当于把第一维变为第三维，其他两维前移
-    img = img * config.std + config.mean  # (228, 906, 3)范围由(-1, 1)变成(0, 1)
+    img = torchvision.utils.make_grid(pic)  
+    img = img.numpy().transpose((1, 2, 0))  
+    img = img * config.std + config.mean 
     return img
 
 def total_variance(img, beta=2):
@@ -240,14 +239,13 @@ def picture_inverse(use_model, feature_true, conv_out, max_epoch, TV=True):
         else:
             MSE = torch.sum((feature_prediction - feature_true) ** 2)
 
-        # -----迭代下降
         H_grad = torch.autograd.grad(outputs=MSE.sum(), inputs=pic_prior, create_graph=True)[0]
         mu = - learning_rate * H_grad
         pic_new = pic_prior - learning_rate * H_grad
 
-        img = torchvision.utils.make_grid(pic_new)  # 把batch_size张的图片拼成一个图片
-        img = img.cpu().data.numpy().transpose((1, 2, 0))  # 本来是(0,1,2)，相当于把第一维变为第三维，其他两维前移
-        img = img * config.std + config.mean  # (228, 906, 3)范围由(-1, 1)变成(0, 1)
+        img = torchvision.utils.make_grid(pic_new)  #
+        img = img.cpu().data.numpy().transpose((1, 2, 0)) 
+        img = img * config.std + config.mean  # (228, 906, 3)
         # plt.imshow(img)
         # plt.show()
 
@@ -285,7 +283,6 @@ def picture_inverse(use_model, feature_true, conv_out, max_epoch, TV=True):
 
     return pic_new.cpu().data, feature_prediction.cpu().data.numpy()
 
-# 全局语义pca可视化
 def plot_lime_PCA(use_model, conv_out, N_select):
     font1 = {'family': 'Arial',
              'weight': 'normal',
@@ -320,7 +317,6 @@ def plot_lime_PCA(use_model, conv_out, N_select):
                 bbox_inches='tight', dpi=300)
     plt.show()
 
-# 可视化mask前后图像
 class PLOT():
     plt.style.use("ggplot")
 
@@ -367,7 +363,6 @@ class PLOT():
                 plt.show()
 
 
-    # 可视化 语义mask后的图片/原始图片
     def plot_position(self):
         position = torch.from_numpy(
             np.load(f'../result_save/{config.position_space}_save_{config.position_animal}_519.npy').astype(np.float32))
@@ -473,8 +468,8 @@ def get_position(conv_out,N_select_PCA,N_select = 512,show_picture=False):
         plt.ylim(-20, 30)
         plt.xticks(fontproperties='Arial', size=7)
         plt.yticks([ -20,-10,  0, 10, 20,30], [20, 10, 0, 10, 20,30], fontproperties='Arial', size=7)
-        plt.legend(loc='lower right',  # 图例的底部中央位置在图像上部居中
-    frameon=False,  # 不显示图例框线
+        plt.legend(loc='lower right',  
+    frameon=False, 
     prop=legend_font)
         plt.savefig(f'PPT_fig/position/{config.position_space}_{config.position_animal}.tiff',
                     bbox_inches='tight', dpi=300)
@@ -483,7 +478,7 @@ def get_position(conv_out,N_select_PCA,N_select = 512,show_picture=False):
 
 
         plt.figure(4, figsize=(2, 2), dpi=300)
-        sort_index_cat = np.argsort(-np.abs(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))[0:1]  # 从小到大
+        sort_index_cat = np.argsort(-np.abs(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))[0:1]  
         plt.bar(range(512),-(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))
         for i in range(len(sort_index_cat)):
             if sort_index_cat[i]<0:
@@ -577,8 +572,8 @@ def get_position_2(conv_out,N_select_PCA,N_select = 512,show_picture=False):
         plt.ylim(-20, 30)
         plt.xticks(fontproperties='Arial', size=7)
         plt.yticks([ -20,-10,  0, 10, 20,30], [20, 10, 0, 10, 20,30], fontproperties='Arial', size=7)
-        plt.legend(loc='lower right',  # 图例的底部中央位置在图像上部居中
-    frameon=False,  # 不显示图例框线
+        plt.legend(loc='lower right',  
+    frameon=False, 
     prop=legend_font)
         plt.savefig(f'PPT_fig/position/{config.position_space}_{config.position_animal}.tiff',
                     bbox_inches='tight', dpi=300)
@@ -587,7 +582,7 @@ def get_position_2(conv_out,N_select_PCA,N_select = 512,show_picture=False):
 
 
         plt.figure(4, figsize=(2, 2), dpi=300)
-        sort_index_cat = np.argsort(-np.abs(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))[0:1]  # 从小到大
+        sort_index_cat = np.argsort(-np.abs(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))[0:1]  
         plt.bar(range(512),-(feature_PCA[0,:,0,0].cpu().data.numpy()-feature_PCA_origin[0, :, 0, 0].cpu().data.numpy()))
         for i in range(len(sort_index_cat)):
             if sort_index_cat[i]<0:
@@ -850,24 +845,21 @@ def plot_distribution(space_index,space_index_auto,space_value,space_value_auto,
     print(np.min(mean), np.max(mean))
     print(np.min(mean_1), np.max(mean_1))
 
-    # 计算纵坐标范围
     min_value = min(np.min(mean), np.min(mean_1))
     max_value = max(np.max(mean), np.max(mean_1))
 
-    # 对mean和mean_1进行标准化
     normalized_mean = (mean - np.mean(mean)) / np.std(mean)
     normalized_mean_1 = (mean_1 - np.mean(mean_1)) / np.std(mean_1)
 
-    # 绘制 Q-Q 图
     plt.figure(1, figsize=(3, 3), dpi=300)
     plt.style.use("seaborn-darkgrid")  # seaborn-darkgrid, ggplot
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     a, b = stats.probplot(normalized_mean, dist="norm", fit=True)
     c, d = stats.probplot(normalized_mean_1, dist="norm", fit=True)
-    plt.scatter(a[0], a[1], c='blue', s=20)  # 蓝色点
-    plt.scatter(c[0], c[1], c='red', s=20)  # 红色点
-    plt.plot(c[0], d[0] * c[0] + d[1], color='black',linewidth=3)  # 拟合直线
+    plt.scatter(a[0], a[1], c='blue', s=20) 
+    plt.scatter(c[0], c[1], c='red', s=20) 
+    plt.plot(c[0], d[0] * c[0] + d[1], color='black',linewidth=3)  
     plt.ylabel('Ordered values', font2)
     plt.xlabel('Theoretical quantities', font2)
     plt.title(f'{config.position_animal} {config.position_space}', font2, pad=7)  # {config.position_animal}
@@ -878,7 +870,6 @@ def plot_distribution(space_index,space_index_auto,space_value,space_value_auto,
     # plt.yticks(range(int(y_min), int(y_max)), fontsize=10)
     plt.yticks(fontsize=10)
 
-    # 提取R^2的值
     n, m = scipy.stats.shapiro(normalized_mean)
     n_1, m_1 = scipy.stats.shapiro(normalized_mean_1)
     r_squared = n
@@ -888,31 +879,28 @@ def plot_distribution(space_index,space_index_auto,space_value,space_value_auto,
     print(r_squared, r_squared_1)
 
 
-    line1 = plt.scatter(a[0], a[1], c='blue', s=20)  # 蓝色点
-    line2 = plt.scatter(c[0], c[1], c='red', s=20)  # 红色点
+    line1 = plt.scatter(a[0], a[1], c='blue', s=20) 
+    line2 = plt.scatter(c[0], c[1], c='red', s=20)  
 
     plt.legend((line1, line2),(f'S-XAI: R\u00b2 = {r_squared:.3f}',f'AS-XAI: R\u00b2 = {r_squared_1:.3f}'),loc='lower right', prop={'family': 'Arial', 'size': 10},shadow=True,frameon=True,facecolor='white',labelspacing=0.5, handlelength=0.5)
 
-    # 设置图形边距
     plt.tight_layout()
 
-    # 设置标题和保存图像
     plt.savefig(f'PPT_fig/position/qq_{config.position_animal}_{config.position_space}.tiff',
                 bbox_inches='tight', dpi=300)
     plt.savefig(f'PPT_fig/position/qq_{config.position_animal}_{config.position_space}.pdf',
                 bbox_inches='tight', dpi=300)
 
-    # 显示图形
     plt.show()
 
     plt.figure(2,figsize=(2,2),dpi=300)
-    mu = np.mean(mean)  # 均值μ
-    sig = np.std(mean)  # 标准差δ
+    mu = np.mean(mean)  
+    sig = np.std(mean)  
 
     print('TPSA正态性检验：\n', scipy.stats.shapiro(mean))
     print(mu,sig)
-    x = np.linspace(np.min(mean),np.max(mean),100)  # 定义域
-    y = np.exp(-(x - mu) ** 2 / (2 * sig ** 2)) / (math.sqrt(2 * math.pi) * sig)  # 定义曲线函数
+    x = np.linspace(np.min(mean),np.max(mean),100) 
+    y = np.exp(-(x - mu) ** 2 / (2 * sig ** 2)) / (math.sqrt(2 * math.pi) * sig) 
     #plt.xlim(0,16)
     plt.plot(x, y, "red", linewidth=2)
     plt.hist(mean,bins=40,color='blue',density=True)
@@ -1016,10 +1004,8 @@ def position_PCA(feature_matrix,n_components):
 
 
 def compute_orthogonality(feature_matrix):
-    # 计算特征矩阵的协方差矩阵
     cov_matrix = np.cov(feature_matrix.T)
 
-    # 计算特征之间的正交性
     num_features = cov_matrix.shape[0]
     orthogonality = np.zeros((num_features, num_features))
     for i in range(num_features):
@@ -1028,7 +1014,6 @@ def compute_orthogonality(feature_matrix):
 
     return orthogonality
 
-# pca可视化共性局部特征
 def get_inverse_position(conv_out,N_select = 512, show_picture=False):
     # position = torch.from_numpy(np.load(f'../result_save/cat_kinds/{config.position_space}_save_{config.position_animal}_2kinds.npy').astype(np.float32))
     # position_origin=torch.from_numpy(np.load(f'../result_save/cat_kinds/{config.position_space}_save_{config.position_animal}_origin_2kinds.npy').astype(np.float32))
@@ -1665,10 +1650,10 @@ def get_inverse_position(conv_out,N_select = 512, show_picture=False):
     plt.savefig(f'../lime_save_2kinds/inverse_pic_{config.position_space}_save_{config.position_animal}_only.tiff',
                 bbox_inches='tight', dpi=300)
     plt.savefig(f'../lime_save_2kinds/inverse_pic_{config.position_space}_save_{config.position_animal}_only.pdf',
-                bbox_inches='tight', dpi=300)  # 共性局部特征
+                bbox_inches='tight', dpi=300)  
     plt.show()
 
-    inverse_pic, inverse_feature = picture_inverse(use_model, feature_PCA.to(config.device),conv_out,max_epoch=4000)  # mask后的feature
+    inverse_pic, inverse_feature = picture_inverse(use_model, feature_PCA.to(config.device),conv_out,max_epoch=4000)
     inverse_pic_plot = transform_raw_picture(inverse_pic)
 
     plt.style.use('default')
@@ -1681,7 +1666,7 @@ def get_inverse_position(conv_out,N_select = 512, show_picture=False):
                 bbox_inches='tight', dpi=300)
     # plt.show()
 
-    inverse_pic, inverse_feature = picture_inverse(use_model, feature_PCA_origin.to(config.device), conv_out, max_epoch=4000)  # 原来所有的feature
+    inverse_pic, inverse_feature = picture_inverse(use_model, feature_PCA_origin.to(config.device), conv_out, max_epoch=4000) 
     inverse_pic_plot = transform_raw_picture(inverse_pic)
 
     plt.style.use('default')
@@ -1715,7 +1700,7 @@ def compare_different_num_inverse(use_model,conv_out,N_select):
         fig=plt.figure(1, figsize=(1.2, 1.2), dpi=300)
         ax = fig.add_subplot(1,1,1)
         ax.bar(range(N_select), PCA_feature[0, :, 0, 0].cpu().data.numpy().reshape(512), color='blue')
-        sort_index_cat = np.argsort(-np.abs(PCA_feature[0, :, 0, 0].cpu().data.numpy()))[0:10]  # 从小到大
+        sort_index_cat = np.argsort(-np.abs(PCA_feature[0, :, 0, 0].cpu().data.numpy()))[0:10]
         print((PCA_feature[0, :, 0, 0].cpu().data.numpy())[sort_index_cat])
         print(PCA_feature[0, :, 0, 0].cpu().data.numpy().max())
 
@@ -1772,12 +1757,12 @@ def plot_radian(data,name):
     # data
     labels = np.array(['dog leg', 'dog eye', 'cat ear', 'cat nose', 'cat leg', 'cat eye', 'dog ear', 'dog nose'])
     # labels = np.array(['cat eye', 'cat leg', 'cat ear'])
-    labels = np.concatenate((labels, [labels[0]]))  # 封闭radar_labels
+    labels = np.concatenate((labels, [labels[0]]))  
 
     dataLenth = 8
     angles = np.linspace(0, 2 * np.pi, dataLenth, endpoint=False)
-    data = np.concatenate((data, [data[0]]))  # 闭合
-    angles = np.concatenate((angles, [angles[0]]))  # 闭合
+    data = np.concatenate((data, [data[0]]))  
+    angles = np.concatenate((angles, [angles[0]])) 
     # plot
     plt.rcParams['font.size'] = 5
     plt.rcParams['font.family']='Arial'
@@ -1786,9 +1771,9 @@ def plot_radian(data,name):
     fig = plt.figure(figsize=(4, 3),dpi=400)
     ax = fig.add_subplot(111, polar=True)
 
-    ax.plot(angles, data, '--',color='r', linewidth=1)  # 画线
+    ax.plot(angles, data, '--',color='r', linewidth=1) 
     ax.scatter(angles,data,c='r',s=15)
-    ax.fill(angles, data, facecolor='r', alpha=0.35)  # 填充
+    ax.fill(angles, data, facecolor='r', alpha=0.35)  
     ax.set_thetagrids(angles * 180 / np.pi, labels, fontproperties="Arial", fontsize=8,fontstyle='normal')
     ax.set_rlim(0,1)
     # ax.set_title("matplotlib雷达图", va='bottom', fontproperties="SimHei",fontsize=22)
@@ -1817,10 +1802,8 @@ def plot_BubbleChart(data_new,name):
     size = 0.2
     data = [[60., 32.]]
 
-    # 使用numpy处理数据
     vals = np.array(data)
 
-    # 定义左侧和右侧气泡的数值
     # cat_values = data_1
     # dog_values = data_2
     cat_values = data_new[:4]
@@ -1828,19 +1811,16 @@ def plot_BubbleChart(data_new,name):
     cat_sum = np.sum(cat_values)
     dog_sum = np.sum(dog_values)
 
-    # 绘制内层圆环
     plt.pie(vals.sum(axis=1), radius=0.5, colors=['#EBF0F2'],  # #EFF4FF, #EBF0F2, #F2EFDF, #ECF2FF, #F2F2F2
             wedgeprops=dict(width=0.15, edgecolor='w'))
 
-    # 内层圆环的半径和位置
     radius_inner = 0.5
     center_inner = (0, 0)
 
-    # 绘制cat和dog的圆形气泡
-    cat_radius = radius_inner - 0.1  # 根据需要调整气泡半径
-    dog_radius = radius_inner - 0.2  # 根据需要调整气泡半径
-    cat_center = (center_inner[0] - radius_inner + 0.1, center_inner[1])  # 根据需要调整气泡位置
-    dog_center = (center_inner[0] + radius_inner - 0.1, center_inner[1])  # 根据需要调整气泡位置
+    cat_radius = radius_inner - 0.1  
+    dog_radius = radius_inner - 0.2  
+    cat_center = (center_inner[0] - radius_inner + 0.1, center_inner[1])  
+    dog_center = (center_inner[0] + radius_inner - 0.1, center_inner[1])  
 
     if dog_sum > cat_sum:
         plt.scatter(*cat_center, s=2500, c='#4C81BA', alpha=1)  # #3A80BA,#857F71,#8698B8,#7A9190
@@ -1859,18 +1839,14 @@ def plot_BubbleChart(data_new,name):
     plt.text(dog_center[0], dog_center[1], f'dog\n{dog_sum:.2f}', color='white', ha='center', va='center',
              fontdict=font2, weight='bold')  # color='white',
 
-    # 绘制外层圆环darkcyan
     plt.pie(vals.sum(axis=1), radius=1, autopct='', pctdistance=0.8, colors=['#EFF4FF'],  # #EFF4FF, #F7FCED, #FFF7F6
             wedgeprops=dict(width=0.2, edgecolor='w'))
 
-    # 在第二个环形上左右两侧分别绘制8个圆形气泡
-    bubble_radius = 0.9  # 根据需要调整气泡半径
-    num_bubbles = 8  # 总共的气泡数量
+    bubble_radius = 0.9  
+    num_bubbles = 8 
 
-    # 计算每个气泡之间的角度间隔
     angle_interval = 360 / num_bubbles
 
-    # 计算左侧和右侧的气泡位置
     # left_bubble_angles = np.arange(110, 250, angle_interval)
     # right_bubble_angles = np.arange(290, 430, angle_interval)
     left_bubble_angles = np.linspace(110, 250, 4)
@@ -1878,7 +1854,6 @@ def plot_BubbleChart(data_new,name):
 
     if dog_sum > cat_sum:
 
-        # 定义不同颜色的气泡列表
         left_bubble_colors = ['#7EB5D6', '#7EB5D6', '#7EB5D6', '#7EB5D6']
         right_bubble_colors = ['#678AA8', '#678AA8', '#678AA8', '#678AA8']
 
@@ -1903,26 +1878,20 @@ def plot_BubbleChart(data_new,name):
         # right_bubble_colors = ['#C3D6E0', '#C3D6E0', '#C3D6E0', '#C3D6E0']
         # left_bubble_colors = ['#C7DBD2', '#C7DBD2', '#C7DBD2', '#C7DBD2']
 
-    # 定义气泡的大小
     bubble_size = 2000
 
-    # 计算第一层圆环上左边气泡的位置
     cat_x = np.cos(np.radians(180)) * cat_radius
     cat_y = np.sin(np.radians(180)) * cat_radius
 
-    # 计算第一层圆环上右边气泡的位置
     dog_x = np.cos(np.radians(0)) * dog_radius
     dog_y = np.sin(np.radians(0)) * dog_radius
 
-    # 绘制左侧的气泡和箭头
 
-    # 绘制左侧的气泡和箭头
     for i, angle in enumerate(left_bubble_angles):
         x = np.cos(np.radians(angle))
         y = np.sin(np.radians(angle))
         plt.scatter(x * bubble_radius, y * bubble_radius, s=bubble_size, c=left_bubble_colors[i], alpha=1)
-        # 自定义箭头结束位置和长度，这里以第一层圆环左边气泡的位置为例
-        arrow_length = 0.1  # 根据需要调整箭头长度
+        arrow_length = 0.1  
         arrow_begin_x = [x * bubble_radius + 0.05, x * bubble_radius + 0.13, x * bubble_radius + 0.13,
                          x * bubble_radius + 0.05]
         arrow_begin_y = [y * bubble_radius - 0.13, y * bubble_radius - 0.05, y * bubble_radius + 0.05,
@@ -1938,17 +1907,14 @@ def plot_BubbleChart(data_new,name):
                                         facecolor=left_bubble_colors[0],
                                         arrowstyle='simple', mutation_scale=13, linewidth=0.5)
         plt.gca().add_patch(arrow)
-        # 在左侧气泡上添加数字标签
         plt.text(x * bubble_radius, y * bubble_radius, f'{cat_values[i]:.2f}', color='white', ha='center', va='center',
                  fontdict=font2, weight='bold')  # , color='white'
 
-    # 绘制右侧的气泡和箭头
     for i, angle in enumerate(right_bubble_angles):
         x = np.cos(np.radians(angle))
         y = np.sin(np.radians(angle))
         plt.scatter(x * bubble_radius, y * bubble_radius, s=bubble_size, c=right_bubble_colors[i], alpha=1)
-        # 自定义箭头结束位置和长度，这里以第一层圆环右边气泡的位置为例
-        arrow_length = 0.1  # 根据需要调整箭头长度
+        arrow_length = 0.1 
         arrow_begin_x = [x * bubble_radius - 0.05, x * bubble_radius - 0.14, x * bubble_radius - 0.13,
                          x * bubble_radius - 0.05]
         arrow_begin_y = [y * bubble_radius + 0.13, y * bubble_radius + 0.03, y * bubble_radius - 0.05,
@@ -1967,10 +1933,9 @@ def plot_BubbleChart(data_new,name):
         plt.text(x * bubble_radius, y * bubble_radius, f'{dog_values[i]:.2f}', color='white', ha='center', va='center',
                  fontdict=font2, weight='bold')
 
-    # 在最外层圆环最外侧标注 "ear"、"eye"、"leg" 和 "nose"
-    outer_radius = 1.13  # 最外层圆环的半径
+    outer_radius = 1.13 
     outer_labels = ["eye", "leg", "ear", "nose", "nose", "ear", "leg", "eye"]
-    outer_label_angles = np.linspace(110, 475, num_bubbles + 1)[:-1]  # 根据需要调整标注位置
+    outer_label_angles = np.linspace(110, 475, num_bubbles + 1)[:-1] 
 
     for angle, label in zip(outer_label_angles, outer_labels):
         x = np.cos(np.radians(angle))
@@ -2311,22 +2276,19 @@ def print_word(conv_out,reshape_num):
 def global_score(scores, multis=2):
     word = ''
     if multis == 5:
-        # 假设已知cat和dog类别的全局分数
         Russian_Blue_cat_scores = scores[0]
         Siamese_cat_scores = scores[1]
         Bull_Terrier_dog_scores = scores[2]
         Weimaraner_dog_scores = scores[3]
         Pembroke_dog_scores = scores[4]
 
-        # 设置横坐标和纵坐标的标签
         # labels = ['cat1', 'cat2', 'dog1', 'dog2', 'dog3']
         labels = ['Russian Blue cat','Siamese cat', 'Bull Terrier dog', 'Weimaraner dog', 'Pembroke dog']
         # scores = Russian_Blue_cat_scores + Siamese_cat_scores + Bull_Terrier_dog_scores + Weimaraner_dog_scores + Pembroke_dog_scores
 
-        # 设置条形图的宽度
+        
         bar_width = 0.3
 
-        # 设置猫和狗的颜色
         Russian_Blue_cat_color = '#8283b4'
         Siamese_cat_color = '#8283b4'
         Bull_Terrier_dog_color = '#8283b4'
@@ -2342,7 +2304,6 @@ def global_score(scores, multis=2):
         plt.style.use("seaborn-darkgrid")
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
-        # 绘制条形图，设置align参数为'center'以使条形图居中对齐，并设置不同的颜色
         # plt.bar(labels, scores, width=bar_width, align='center', color=[Russian_Blue_cat_color, Siamese_cat_color, Bull_Terrier_dog_color, Weimaraner_dog_color, Pembroke_dog_color], label=('Russian_Blue_cat', 'Siamese_cat', 'Bull_Terrier_dog', 'Weimaraner_dog', 'Pembroke_dog'))
         plt.bar(labels[0], Russian_Blue_cat_scores, width=bar_width, align='center', color=Russian_Blue_cat_color) # label='Russian_Blue_cat'
         plt.bar(labels[1], Siamese_cat_scores, width=bar_width, align='center', color=Siamese_cat_color) # label='Siamese_cat'
@@ -2353,7 +2314,6 @@ def global_score(scores, multis=2):
         plt.xlabel('Category', font2)
         plt.ylabel('Score', font2)
         plt.title('Global Scores of Cat and Dog Categories', font2, pad=30)
-        # 在柱状图的右上角添加大小标签
         for i in range(len(labels)):
             plt.text(labels[i], scores[i], f'{scores[i]:.2f}', ha='center', va='bottom',fontdict=font2)
         # plt.legend(('Russian_Blue_cat', 'Siamese_cat', 'Bull_Terrier_dog', 'Weimaraner_dog', 'Pembroke_dog'), loc='upper right')
@@ -2371,19 +2331,15 @@ def global_score(scores, multis=2):
         print(word)
 
     if multis == 2:
-        # 假设已知cat和dog类别的全局分数
         cat_scores = scores[0]
         dog_scores = scores[1]
 
 
-        # 设置横坐标和纵坐标的标签
         labels = ['cat', 'dog']
         # scores = cat_scores + dog_scores
 
-        # 设置条形图的宽度
         bar_width = 0.3
 
-        # 设置猫和狗的颜色
         # cat_color = '#BBCEC8'
         # dog_color = '#8F94A6'
         cat_color = '#8283B4'
@@ -2393,7 +2349,6 @@ def global_score(scores, multis=2):
         plt.style.use("seaborn-darkgrid")
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
-        # 绘制条形图，设置align参数为'center'以使条形图居中对齐，并设置不同的颜色
         # plt.bar(labels, scores, width=bar_width, align='center', color=[Russian_Blue_cat_color, Siamese_cat_color, Bull_Terrier_dog_color, Weimaraner_dog_color, Pembroke_dog_color], label=('Russian_Blue_cat', 'Siamese_cat', 'Bull_Terrier_dog', 'Weimaraner_dog', 'Pembroke_dog'))
         plt.bar(labels[0], cat_scores, width=bar_width, align='center', color=cat_color, label='cat')
         plt.bar(labels[1], dog_scores, width=bar_width, align='center', color=dog_color, label='dog')
@@ -2402,7 +2357,6 @@ def global_score(scores, multis=2):
         plt.ylabel('Score', font2)
         plt.title('Global Scores of Categories', font2, pad=20)
 
-        # 在柱状图的右上角添加大小标签
         for i in range(len(labels)):
             plt.text(i, scores[i], f'{scores[i]:.2f}', ha='center', va='bottom',fontdict=font2)
         # for i in range(len(labels)):
@@ -2483,8 +2437,8 @@ def identify_adverse(conv_out,reshape_num):
 
 
 ppnet = torch.load('../saved_models/cat_vs_dog_scq/vgg19/hsvtest/0nopush1.0000.pth')
-# ppnet = torch.load('../saved_models/oxford_102_flower_dataset/vgg19/test/0nopush0.7931.pth') # 2分类
-# ppnet = torch.load('../saved_models/cat_dog_scq/vgg19/_ortest/0nopush0.9927.pth')  # 5分类
+# ppnet = torch.load('../saved_models/oxford_102_flower_dataset/vgg19/test/0nopush0.7931.pth') 
+# ppnet = torch.load('../saved_models/cat_dog_scq/vgg19/_ortest/0nopush0.9927.pth') 
 # ppnet = torch.load('../saved_models/cat_vs_dog_scq_2/resnet50/test/0nopush0.9845.pth')
 # ppnet = torch.load('../saved_models/cat_vs_dog_scq_2/densenet121/test/0nopush1.0000.pth')
 
@@ -2496,32 +2450,24 @@ conv_out = LayerActivations(use_model.features[2], config.visual_layer) # vgg
 # conv_out = LayerActivations(use_model[-1], config.visual_layer)  # .features[0][9][3]
 
 
-## 根据GA超像素输入到model中得到指定激活层的特征矩阵
 # generate_feature_matrix(use_model, conv_out, 324, lime=True)
 
-## 全局语义pca可视化
 # plot_lime_PCA(use_model, conv_out, N_select=512)
 
-## 可视化mask前后图像
 # plot=PLOT(conv_out,512)
-# plot.plot_position()  # 可视化mask前后的图片
+# plot.plot_position() 
 # plot.plot_one_sample()
 
-## 保存激活之后的特征
 # val_distribution(conv_out,512)  # vgg
 # val_distribution(conv_out,1024)
 
-## 显示mask前后特征激活情况
 # sort_index_origin,sort_index_position,space_index,space_value=get_position(conv_out,5,show_picture=False)
 # _,_,space_index_auto,space_value_auto=get_position_2(conv_out,5,show_picture=False)
-## 语义成分最大和最小的可视化
 # plot_distribution(space_index,space_index_auto,space_value,space_value_auto,picture='small')
 
-## 提取mask后的共性局部特征
 # get_inverse_position(conv_out, N_select = 512)
 
 
-# 雷达图
 print_word(conv_out,512)
 
 # global score 语句自动生成
@@ -2533,13 +2479,10 @@ print_word(conv_out,512)
 # scores = [2.73, 2.85, 3.31, 4.05, 3.45]  # 2
 # global_score(scores, multis=5)
 
-
-# 对抗样本
 # identify_adverse(conv_out,reshape_num = 512)
 
 
 # compare_different_num_inverse(use_model,conv_out, N_select = 512)
 # plot_N()
 
-# 计算语义重要性+语义概率
 # pca_scores(use_model)
