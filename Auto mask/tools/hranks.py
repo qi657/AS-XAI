@@ -86,7 +86,6 @@ def save_preprocessed_img(preprocessed_imgs, index=0):
     return undo_preprocessed_img
 
 
-# 加载VGG模型
 ppnet = torch .load('D:/TesNet-1/saved_models/cat_dog_scq/vgg19/_ortest/2push0.9964.pth')
 # ppnet = torch.load('D:/TesNet-1/saved_models/cat_vs_dog_scq_2/vgg19/cluster_test/3push1.0000.pth')  # cat_and_dog_2
 # ppnet = torch.load('D:/TesNet-1/saved_models/cat_vs_dog_scq_2/vgg19/opl_test/3push0.9969.pth')  # cat_dog_filter
@@ -104,7 +103,6 @@ model.eval()
 
 
 def generate_irregular_mask(activation_map, threshold1):
-    # 创建二值掩码
     mask = np.zeros_like(activation_map)
     mask[(activation_map >= threshold1)] = 255
     mask = np.uint8(mask)
@@ -147,27 +145,21 @@ for j, data in enumerate(test_loader):
 
         img_now = 0.5*original_img+0.3*heatmap
 
-        percentile1 = 95  # 阈值
+        percentile1 = 95  
         threshold1 = np.percentile(rescaled_activation_pattern, percentile1)
 
-        # 生成不规则掩码
         irregular_mask = generate_irregular_mask(rescaled_activation_pattern, threshold1)
         masked_image_1 = np.copy(original_img)
         masked_image_1[irregular_mask == 0] = 0
-        # masked_image_1[irregular_mask == 0] = masked_image_1[irregular_mask == 0] * 0.7  # 调整亮度值   可视化（贴图用）
+        # masked_image_1[irregular_mask == 0] = masked_image_1[irregular_mask == 0] * 0.7  
 
-        # # 将不规则掩码转换为二值图像
         # irregular_mask_binary = np.uint8(irregular_mask > 0)
         #
-        # # 绘制不规则掩码边缘
         # contours, _ = cv2.findContours(irregular_mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # # 将 masked_image 转换为 UMat 类型
         # masked_image_umat = cv2.UMat(masked_image_1)
         #
-        # # 绘制不规则掩码边缘
         # cv2.drawContours(masked_image_umat, contours, -1, (255, 0, 0), 0)
         #
-        # # 将 masked_image_umat 转换回 ndarray 类型
         # masked_image_1 = cv2.UMat.get(masked_image_umat)
 
         # plt.imshow(masked_image_1)
