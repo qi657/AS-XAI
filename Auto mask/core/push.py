@@ -10,7 +10,7 @@ from ..util.helpers import makedir, find_high_activation_crop
 
 
 def generate_irregular_mask(activation_map, threshold):
-    # 创建二值掩码
+    
     mask = np.zeros_like(activation_map)
     mask[activation_map >= threshold] = 255
     mask = np.uint8(mask)
@@ -65,12 +65,12 @@ def push_prototypes(dataloader, # pytorch dataloader (must be unnormalized in [0
 
     '''
     proto_rf_boxes and proto_bound_boxes column:
-    0: image index in the entire dataset   0：整个数据集中的图像索引
-    1: height start index                  1：高度起始索引
-    2: height end index                    2：高度结束指数
-    3: width start index                   3：宽度起始索引
-    4: width end index                     4：宽度结束索引
-    5: (optional) class identity           5：（可选）类标识
+    0: image index in the entire dataset   
+    1: height start index                  
+    2: height end index                    
+    3: width start index                   
+    4: width end index                     
+    5: (optional) class identity           
     '''
     if save_prototype_class_identity:
         proto_rf_boxes = np.full(shape=[n_prototypes, 6],
@@ -89,7 +89,7 @@ def push_prototypes(dataloader, # pytorch dataloader (must be unnormalized in [0
                                            'epoch-'+str(epoch_number))
             makedir(proto_epoch_dir)
         else:
-            proto_epoch_dir = root_dir_for_saving_prototypes #保存的地址
+            proto_epoch_dir = root_dir_for_saving_prototypes 
     else:
         proto_epoch_dir = None
 
@@ -253,7 +253,7 @@ def update_prototypes_on_batch(search_batch_input,
             if proto_rf_boxes.shape[1] == 6 and search_y is not None:
                 proto_rf_boxes[j, 5] = search_y[rf_prototype_j[0]].item() #
 
-            # find the highly activated region of the original image 找到原始图像的高度激活区域
+            # find the highly activated region of the original image 
             proto_dist_img_j = proto_dist_[img_index_in_batch, j, :, :]
             proto_act_img_j = - proto_dist_img_j
             # if prototype_network_parallel.module.prototype_activation_function == 'log':
@@ -266,42 +266,35 @@ def update_prototypes_on_batch(search_batch_input,
                                              interpolation=cv2.INTER_CUBIC)
 
             # new code
-            # 假设你已经有了激活图 activation_map 和原始图像 original_image
-            activation_map = upsampled_act_img_j  # 激活图
-            original_image = original_img_j  # 原始图像
+            activation_map = upsampled_act_img_j  
+            original_image = original_img_j  
 
-            percentile = 97  # 阈值
+            percentile = 97  
             threshold = np.percentile(activation_map, percentile)
 
-            # 生成不规则掩码
             irregular_mask_1 = generate_irregular_mask(activation_map, threshold)
             irregular_mask_2 = generate_irregular_mask(activation_map, threshold)
             irregular_mask_3 = generate_irregular_mask(activation_map, threshold)
             # plt.imshow(irregular_mask)
             # plt.show()
 
-            # 应用不规则掩码到原始图像
             masked_image_1 = np.copy(original_image)
-            masked_image_1[irregular_mask_1 == 0] = 0  # 黑白的高激活区域（用来做mask）
+            masked_image_1[irregular_mask_1 == 0] = 0  
 
             masked_image_2 = np.copy(original_image)
-            masked_image_2[irregular_mask_2 == 0] = masked_image_2[irregular_mask_2 == 0] * 0.7  # 调整亮度值   可视化（贴图用）
+            masked_image_2[irregular_mask_2 == 0] = masked_image_2[irregular_mask_2 == 0] * 0.7  
 
             masked_image_3 = np.copy(original_image)
             masked_image_3[irregular_mask_3 == 255] = [255, 255, 0]
 
-            # 将不规则掩码转换为二值图像
             irregular_mask_binary = np.uint8(irregular_mask_2 > 0)
 
-            # 绘制不规则掩码边缘
             contours, _ = cv2.findContours(irregular_mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            # 将 masked_image 转换为 UMat 类型
+
             masked_image_umat = cv2.UMat(masked_image_2)
 
-            # 绘制不规则掩码边缘
             cv2.drawContours(masked_image_umat, contours, -1, (255, 0, 0), 0)
 
-            # 将 masked_image_umat 转换回 ndarray 类型
             masked_image_2 = cv2.UMat.get(masked_image_umat)
 
             masked_image_2 = cv2.cvtColor(masked_image_2, cv2.COLOR_RGB2BGR)
@@ -313,11 +306,11 @@ def update_prototypes_on_batch(search_batch_input,
 
 
             proto_bound_j = find_high_activation_crop(upsampled_act_img_j)
-            # crop out the image patch with high activation as prototype image  裁剪出具有高激活度的图像块作为原型图像
+            # crop out the image patch with high activation as prototype image  
             proto_img_j = original_img_j[proto_bound_j[0]:proto_bound_j[1],
                                          proto_bound_j[2]:proto_bound_j[3], :]
 
-            # save the prototype boundary (rectangular boundary of highly activated region)  保存原型边界（高度激活区域的矩形边界）
+            # save the prototype boundary (rectangular boundary of highly activated region)  
             proto_bound_boxes[j, 0] = proto_rf_boxes[j, 0]
             proto_bound_boxes[j, 1] = proto_bound_j[0]
             proto_bound_boxes[j, 2] = proto_bound_j[1]
@@ -333,13 +326,13 @@ def update_prototypes_on_batch(search_batch_input,
                                          prototype_self_act_filename_prefix + str(j) + '.npy'),
                             proto_act_img_j)
                 if prototype_img_filename_prefix is not None:
-                    # save the whole image containing the prototype as png  将包含原型的整个图像保存为png
+                    # save the whole image containing the prototype as png  
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
                                             prototype_img_filename_prefix + '-original' + str(j) + '.png'),
                                original_img_j,
                                vmin=0.0,
                                vmax=1.0)
-                    # overlay (upsampled) self activation on original image and save the result  在原始图像上覆盖（上采样）自激活并保存结果
+                    # overlay (upsampled) self activation on original image and save the result  
                     rescaled_act_img_j = upsampled_act_img_j - np.amin(upsampled_act_img_j)
                     rescaled_act_img_j = rescaled_act_img_j / np.amax(rescaled_act_img_j)
                     heatmap = cv2.applyColorMap(np.uint8(255*rescaled_act_img_j), cv2.COLORMAP_JET)
@@ -352,7 +345,7 @@ def update_prototypes_on_batch(search_batch_input,
                                vmin=0.0,
                                vmax=1.0)
                     
-                    # if different from the original (whole) image, save the prototype receptive field as png   如果与原始（整个）图像不同，请将原型感受野保存为png
+                    # if different from the original (whole) image, save the prototype receptive field as png   
                     if rf_img_j.shape[0] != original_img_size or rf_img_j.shape[1] != original_img_size:
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
                                                 prototype_img_filename_prefix + '-receptive_field' + str(j) + '.png'),
@@ -367,7 +360,7 @@ def update_prototypes_on_batch(search_batch_input,
                                    vmin=0.0,
                                    vmax=1.0)
                     
-                    # save the prototype image (highly activated region of the whole image)  保存原型图像（整个图像的高度激活区域）
+                    # save the prototype image (highly activated region of the whole image) 
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
                                             prototype_img_filename_prefix + str(j) + '.png'),
                                proto_img_j,
