@@ -21,9 +21,9 @@ class OrthogonalProjectionLoss(nn.Module):
         labels = labels[:, None]  # extend dim
 
         mask = torch.eq(labels, labels.t()).bool().to(device)
-        eye = torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)  # 2D张量, 对角线为1，其他位置为零
+        eye = torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)  
 
-        mask_pos = mask.masked_fill(eye, 0).float()  # 用value填充tensor中与mask中值为1位置相对应的元素
+        mask_pos = mask.masked_fill(eye, 0).float()  
         mask_neg = (~mask).float()
         dot_prod = torch.matmul(features, features.t())
 
@@ -39,11 +39,11 @@ class ContrastiveLoss(nn.Module):
     def __init__(self, batch_size, device='cuda', temperature=0.5):
         super().__init__()
         self.batch_size = batch_size
-        self.register_buffer("temperature", torch.tensor(temperature).to(device))  # 超参数 温度
+        self.register_buffer("temperature", torch.tensor(temperature).to(device)) 
         self.register_buffer("negatives_mask", (
-            ~torch.eye(batch_size * 2, batch_size * 2, dtype=bool).to(device)).float())  # 主对角线为0，其余位置全为1的mask矩阵
+            ~torch.eye(batch_size * 2, batch_size * 2, dtype=bool).to(device)).float())  
 
-    def forward(self, emb_i, emb_j):  # emb_i, emb_j 是来自同一图像的两种不同的预处理方法得到
+    def forward(self, emb_i, emb_j):  # emb_i, emb_j 
         z_i = F.normalize(emb_i, dim=1)  # (bs, dim)  --->  (bs, dim)
         z_j = F.normalize(emb_j, dim=1)  # (bs, dim)  --->  (bs, dim)
 
@@ -79,24 +79,19 @@ def calculate_ifd(prototypes):
     return ifd
 
 
-# prototype_vectors是一个形状为(num_prototypes, feature_dim)的numpy数组，
-# labels是一个形状为(num_prototypes,)的numpy数组，每个元素代表原型所属的类别
+
 def avg_interclass_prototype_distance(prototype_vectors, labels):
-    # 计算每个类别的原型平均向量
     class_prototype_means = {}
     for i in np.unique(labels):
         class_prototype_means[i] = np.mean(prototype_vectors[labels == i], axis=0)
 
-    # 计算所有类别的原型平均向量
     overall_prototype_mean = np.mean(list(class_prototype_means.values()), axis=0)
 
-    # 计算每个类别原型平均向量和所有类别的原型平均向量之间的欧氏距离
     interclass_distances = []
     for i in np.unique(labels):
         distance = np.linalg.norm(class_prototype_means[i] - overall_prototype_mean)
         interclass_distances.append(distance)
 
-    # 计算所有类别的原型平均距离
     avg_interclass_distance = np.mean(interclass_distances)
 
     return avg_interclass_distance
