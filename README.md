@@ -39,9 +39,8 @@ Run `Auto mask/tools/analysis.py`
 For detailed design details please see: https://github.com/qi657/AS-XAI-Human-Evaluation
 
 ## Reference
-If you use AS-XAI in your research, please cite the following:
-
-'''
+If you use this code, our models or data set for your research, please cite [this](https://onlinelibrary.wiley.com/doi/full/10.1002/aisy.202400359) publication:
+```bibtex
 @article{sun2024xai,
   title={AS-XAI: Self-Supervised Automatic Semantic Interpretation for CNN},
   author={Sun, Changqi and Xu, Hao and Chen, Yuntian and Zhang, Dongxiao},
@@ -50,4 +49,4 @@ If you use AS-XAI in your research, please cite the following:
   year={2024},
   publisher={Wiley Online Library}
 }
-'''
+```
