@@ -37,3 +37,17 @@ Run `Auto mask/tools/analysis.py`
 
 ## Human Quantitative Evaluation
 For detailed design details please see: https://github.com/qi657/AS-XAI-Human-Evaluation
+
+## Reference
+If you use AS-XAI in your research, please cite the following:
+
+'''
+@article{sun2024xai,
+  title={AS-XAI: Self-Supervised Automatic Semantic Interpretation for CNN},
+  author={Sun, Changqi and Xu, Hao and Chen, Yuntian and Zhang, Dongxiao},
+  journal={Advanced Intelligent Systems},
+  pages={2400359},
+  year={2024},
+  publisher={Wiley Online Library}
+}
+'''
