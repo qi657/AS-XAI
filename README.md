@@ -1,5 +1,6 @@
 # AS-XAI
-
+This repository contains code accompanying the paper
+> Sun, C., Xu, H., Chen, Y., & Zhang, D. (2024). AS‐XAI: Self‐Supervised Automatic Semantic Interpretation for CNN. Advanced Intelligent Systems, 2400359.
 
 ## Getting Started
 
